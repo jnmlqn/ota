@@ -2,16 +2,13 @@
 
 namespace App\Repositories;
 
+use App\Enums\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 
 class UserRepository
 {
-    private const EMPLOYER = 'employer';
-    private const SEEKER = 'seeker';
-    private const MODERATOR = 'moderator';
-
     public function __construct(
         private User $user
     ) {
@@ -27,21 +24,21 @@ class UserRepository
         }
 
         switch ($user->roleId->name) {
-            case self::EMPLOYER:
+            case Role::EMPLOYER->value:
                 $permissions = [
                     'ota:job_post'
                 ];
 
                 break;
 
-            case self::SEEKER:
+            case Role::SEEKER->value:
                 $permissions = [
                     'ota:job_view'
                 ];
 
                 break;
 
-            case self::MODERATOR:
+            case Role::MODERATOR->value:
                 $permissions = [
                     'ota:job_status'
                 ];

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Dto\JobPostDto;
+use App\Events\JobPostCreatedEvent;
 use App\Models\JobPost;
 
 class JobPostsRepository
@@ -28,6 +29,9 @@ class JobPostsRepository
     {
         $jobPost = $this->jobPost->create($dto->toArray());
 
+        $event = (new JobPostCreatedEvent)->setJobPost($jobPost);
+        event($event);
+
         return $jobPost->toArray();
     }
 
@@ -38,5 +42,14 @@ class JobPostsRepository
         $jobPost->save();
 
         return true;
+    }
+
+    public function getCountByEmail(string $email): int
+    {
+        $jobPostsCount = $this->jobPost->whereHas('submittedBy', function ($q) use ($email) {
+            $q->where('email', $email);
+        })->count();
+
+        return $jobPostsCount;
     }
 }
