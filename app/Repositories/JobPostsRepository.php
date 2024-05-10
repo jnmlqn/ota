@@ -22,11 +22,42 @@ class JobPostsRepository
             ->get()
             ->toArray();
 
-        return array_map(function ($jobPost) {
+        $jobPosts = array_map(function ($jobPost) {
             $jobPost['submitted_by'] = $jobPost['submitted_by']['name'];
 
             return $jobPost;
         }, $jobPosts);
+
+        $xml = simplexml_load_string(file_get_contents('https://mrge-group-gmbh.jobs.personio.de/xml'), "SimpleXMLElement", LIBXML_NOCDATA);
+        $externalJobPosts = json_encode($xml);
+        $externalJobPosts = json_decode($externalJobPosts,TRUE);
+        $externalJobPosts = array_map(function ($jobPost) {
+            $description = '';
+
+            foreach ($jobPost['jobDescriptions']['jobDescription'] as $jd) {
+                $description .= $jd['name'] . "\n";
+                $description .= $jd['value'] . "\n";
+            }
+
+            return [
+                'title' => $jobPost['name'],
+                'description' => $description,
+                'sub_company' => $jobPost['subcompany'],
+                'office' => $jobPost['office'],
+                'department' => $jobPost['department'],
+                'recruiting_category' => $jobPost['recruitingCategory'],
+                'employment_type' => $jobPost['employmentType'],
+                'seniority' => $jobPost['seniority'],
+                'schedule' => $jobPost['schedule'],
+                'years_of_exp' => $jobPost['yearsOfExperience'],
+                'keywords' => explode(',', $jobPost['keywords']),
+                'occupation' => $jobPost['occupation'],
+                'occupation_category' => $jobPost['occupationCategory'],
+                'submitted_by' => 'external',
+            ];
+        }, $externalJobPosts);
+
+        return array_merge($jobPosts, $externalJobPosts);
     }
 
     public function create(JobPostDto $dto): array
