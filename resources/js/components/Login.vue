@@ -2,6 +2,8 @@
   <div>
     <h5 class="mb-3 mt-3">Please login to continue</h5>
 
+    <p class="error text-danger">{{ error }}</p>
+
     <div class="mb-3">
         <label for="email" class="form-label">Email address</label>
         <input type="email" class="form-control" id="email" placeholder="name@example.com" v-model="email">
@@ -32,6 +34,7 @@ export default {
 
     data() {
         return {
+            error: '',
             email: '',
             password: '',
             validation: {
@@ -44,6 +47,7 @@ export default {
 
     methods: {
         login() {
+            this.error = '';
             this.validation.email = '';
             this.validation.password = ''
 
@@ -65,7 +69,19 @@ export default {
                 role: this.role,
             };
 
-            this.api.login(data, this.role);
+            this.api.login(data)
+            .then((response) => {
+                let resp = response.data;
+                document.cookie = `access_token=${resp.data.token}`;
+                document.cookie = `role=${this.role}`;
+                window.location = this.role === 'seeker'
+                    ? '/job-board'
+                    : '/create-job';
+            })
+            .catch((error) => {
+                console.log(error);
+                this.error = error.response.data.message;
+            });
         }
     }
 };
@@ -74,5 +90,8 @@ export default {
 <style type="text/css" scoped>
     .smaller {
         font-size: .8em;
+    }
+    .error {
+        text-align: center;
     }
 </style>

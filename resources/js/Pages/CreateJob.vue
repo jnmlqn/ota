@@ -1,4 +1,7 @@
 <template>
+    <button class="btn btn-danger float-end" @click="logout()">Logout</button>
+    <br/>
+    <br/>
     <div>
         <h5 class="mb-3 mt-3">Create Job</h5>
 
@@ -209,6 +212,10 @@ export default {
                     this.error = error.response.message;
                 }
             });
+        },
+
+        logout() {
+            this.api.logout()
         }
     },
 };

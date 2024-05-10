@@ -4,27 +4,31 @@ export default class Api
 {
 	private url:string = 'https://ota.ddev.site/api/';
 
-    login(data: array, userType: string) {
-		axios.post(this.url + 'login', data)
-	    .then((response) => {
-	        let resp = response.data;
-	        document.cookie = `access_token=${resp.data.token}`;
-	        window.location = userType === 'seeker'
-	        	? '/job-board'
-	        	: '/create-job';
-	    })
-	    .catch((error) => {
-	        console.log(error);
-	    });
+    login(data: array) {
+		return axios.post(this.url + 'login', data);
 	}
 
-	checkAuth() {
+	logout() {
+		document.cookie = `access_token=''`;
+        document.cookie = `role=''`;
+        window.location = '/';
+	}
+
+	checkAuth(loginPage: bool = false) {
 		this.get('user')
 		.then((response) => {
-			console.log(response);
+			if (loginPage) {
+				let userType = this.getCookieValue('role');
+			
+				window.location = userType === 'seeker'
+		        	? '/job-board'
+		        	: '/create-job';
+			}
 		})
 	    .catch((error) => {
-	        window.location = '/';
+	        if (!loginPage) {
+	        	window.location = '/';
+	        }
 	    });
 	}
 
@@ -51,7 +55,11 @@ export default class Api
 	}
 
 	getAccessToken() {
-        let name = 'access_token' + "=";
+        return this.getCookieValue('access_token');
+    }
+
+    getCookieValue(key: string) {
+    	let name = key + "=";
         let decodedCookie = decodeURIComponent(document.cookie);
         let ca = decodedCookie.split(';');
 

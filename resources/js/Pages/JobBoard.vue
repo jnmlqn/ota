@@ -1,4 +1,7 @@
 <template>
+    <button class="btn btn-danger float-end" @click="logout()">Logout</button>
+    <br/>
+    <br/>
     <div>
         <h5 class="mb-3 mt-3">Job Board</h5>
 
@@ -83,6 +86,10 @@ export default {
             .catch((error) => {
                 console.log(error);
             });
+        },
+
+        logout() {
+            this.api.logout()
         }
     },
 };
