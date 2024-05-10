@@ -47,7 +47,7 @@ class JobPostsController extends Controller
             'seniority' => ['required', Rule::enum(Seniority::class)],
             'schedule' => ['required', Rule::enum(Schedule::class)],
             'years_of_exp' => ['required'],
-            'keywords' => ['required', 'array'],
+            'keywords' => ['required'],
             'occupation' => ['required'],
             'occupation_category' => ['required'],
         ]);
@@ -62,7 +62,8 @@ class JobPostsController extends Controller
             ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $data = $request->all();
+        $data = $validator->validated();
+        $data['keywords'] = explode(',', $data['keywords']);
         $data['submitted_by'] = $request->user()->id;
 
         $dto = new JobPostDto;

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Enums\Role;
+use App\Models\Role as RoleModel;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
@@ -15,9 +16,16 @@ class UserRepository
         $this->user = $user;
     }
 
-    public function createLoginToken(string $email, string $password): string
-    {
-        $user = $this->user->where('email', $email)->firstOrFail();
+    public function createLoginToken(
+        string $email,
+        string $password,
+        string $role
+    ): string {
+        $role = RoleModel::where('name', $role)->first();
+        $user = $this->user
+            ->where('email', $email)
+            ->where('role_id', $role->id ?? null)
+            ->firstOrFail();
 
         if (!Hash::check($password, $user->password)) {
             throw new Exception('Incorrect password');

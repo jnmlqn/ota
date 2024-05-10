@@ -22,6 +22,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => ['required'],
             'password' => ['required'],
+            'role' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -37,7 +38,8 @@ class AuthController extends Controller
         try {
             $token = $this->userRepository->createLoginToken(
                 $validator->validated()['email'],
-                $validator->validated()['password']
+                $validator->validated()['password'],
+                $validator->validated()['role']
             );
 
             $data = [
@@ -52,7 +54,7 @@ class AuthController extends Controller
         } catch (ModelNotFoundException $e) {
             $data = [
                 'success' => false,
-                'message' => 'Invalid email address',
+                'message' => 'Account not found',
             ];
 
             $code = JsonResponse::HTTP_UNAUTHORIZED;

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Dto\JobPostDto;
+use App\Enums\Status;
 use App\Events\JobPostCreatedEvent;
 use App\Models\JobPost;
 
@@ -16,7 +17,10 @@ class JobPostsRepository
 
     public function index(): array
     {
-        $jobPosts = JobPost::with('submittedBy:id,name')->get()->toArray();
+        $jobPosts = JobPost::with('submittedBy:id,name')
+            ->where('status', Status::PUBLISHED->value)
+            ->get()
+            ->toArray();
 
         return array_map(function ($jobPost) {
             $jobPost['submitted_by'] = $jobPost['submitted_by']['name'];
