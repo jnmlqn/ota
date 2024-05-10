@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -18,11 +19,26 @@ class AuthController extends Controller
 
     public function login(Request $request): JsonResponse
     {
-        $email = $request->input('email');
-        $password = $request->input('password');
+        $validator = Validator::make($request->all(), [
+            'email' => ['required'],
+            'password' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Login failed',
+                'data' => [
+                    'errors' => json_decode($validator->errors()->toJson(), true)
+                ],
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         try {
-            $token = $this->userRepository->findByEmailAndPassword($email, $password);
+            $token = $this->userRepository->createLoginToken(
+                $validator->validated()['email'],
+                $validator->validated()['password']
+            );
 
             $data = [
                 'success' => true,

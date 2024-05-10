@@ -110,9 +110,31 @@ class JobPostsController extends Controller
                 'message' => $e->getMessage(),
             ];
             
-            $code = JsonResponse::HTTP_NOT_FOUND;
+            $code = JsonResponse::HTTP_INTERNAL_SERVER_ERROR;
         }
 
         return response()->json($data, $code);
+    }
+
+    public function updateStatusViaEmail(
+        Request $request,
+        string $id,
+        string $status
+    ) {
+        try {
+            if (!in_array($status, array_column(Status::cases(), 'value'))) {
+                $message = 'Invalid status';
+            } else {
+                $this->jobPostsRepository->updateStatus($id, $status);
+
+                $message = 'Job post status successflly updated';
+            }
+        } catch (ModelNotFoundException $e) {
+            $message = 'Invalid job posting';
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        return view('status_update', compact('message'));
     }
 }

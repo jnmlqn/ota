@@ -15,7 +15,7 @@ class UserRepository
         $this->user = $user;
     }
 
-    public function findByEmailAndPassword(string $email, string $password): string
+    public function createLoginToken(string $email, string $password): string
     {
         $user = $this->user->where('email', $email)->firstOrFail();
 
@@ -51,7 +51,8 @@ class UserRepository
 
         return $user->createToken(
             'basic', 
-            $permissions
+            $permissions,
+            now()->addDay()
         )->plainTextToken;
     }
 }

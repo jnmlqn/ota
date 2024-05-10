@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\JobPost;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -18,9 +19,11 @@ class JobPostCreatedMail extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        private JobPost $jobPost
+        private JobPost $jobPost,
+        private User $moderator
     ) {
         $this->jobPost = $jobPost;
+        $this->moderator = $moderator;
         $this->onQueue('EmailNotificationQueue');
     }
 
@@ -39,9 +42,17 @@ class JobPostCreatedMail extends Mailable
      */
     public function content(): Content
     {
+        $token = $this->moderator->createToken(
+            'basic', 
+            ['ota:job_status'],
+            now()->addHour()
+        )->plainTextToken;
+
         return new Content(
             view: 'job_posts.email.created',
             with: [
+                'id' => $this->jobPost->id,
+                'token' => $token,
                 'submitted_by' => $this->jobPost->submittedBy->email,
                 'description' => $this->jobPost->description,
             ]

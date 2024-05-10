@@ -12,5 +12,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/job-posts', [App\Http\Controllers\JobPostsController::class, 'index'])->middleware('ability:ota:job_view');
     Route::post('/job-posts', [App\Http\Controllers\JobPostsController::class, 'create'])->middleware('ability:ota:job_post');
-    Route::post('/job-posts/{id}/{status}', [App\Http\Controllers\JobPostsController::class, 'updateStatus'])->middleware('ability:ota:job_status');
+    Route::put('/job-posts/{id}/{status}', [App\Http\Controllers\JobPostsController::class, 'updateStatus'])->middleware('ability:ota:job_status');
 });

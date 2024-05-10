@@ -2,6 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Enums\Role as RoleEnum;
+use App\Models\Role;
+use App\Models\User;
 use App\Mail\JobPostCreatedMail;
 use App\Models\JobPost;
 use Illuminate\Bus\Queueable;
@@ -30,8 +33,13 @@ class SendEmailJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Mail::to($this->jobPost->submittedBy->email)->send(
-            new JobPostCreatedMail($this->jobPost)
-        );
+        $role = Role::where('name', RoleEnum::MODERATOR->value)->first();
+        $moderator = User::where('role_id', $role->id)->first();
+
+        if ($moderator) {
+            Mail::to($moderator->email)->send(
+                new JobPostCreatedMail($this->jobPost, $moderator)
+            );
+        }
     }
 }
